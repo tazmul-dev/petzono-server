@@ -54,6 +54,19 @@ const run = async () =>{
       res.send(petId)
     })
 
+    app.post('/pets', async (req, res)=>{
+      const allPet = req.body
+      console.log(allPet)
+      const result = await petCollection.insertOne(allPet)
+      res.send(result)
+    })
+
+    app.get('/myListing/:email', async(req, res)=>{
+      const cursor = petCollection.find({ownerEmail:req.params.email})
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
 
     await client.db('admin').command({ping:1});
      console.log("Pinged your deployment. You successfully connected to MongoDB!");
