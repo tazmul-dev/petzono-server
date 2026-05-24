@@ -45,7 +45,7 @@ const run = async () =>{
     })
     app.get('/pets/:id', async(req, res)=>{
       const id = req.params.id
-      console.log(id)
+      // console.log(id)
       const query = {
         _id: new ObjectId(id)
       }
@@ -65,6 +65,15 @@ const run = async () =>{
       const cursor = petCollection.find({ownerEmail:req.params.email})
       const result = await cursor.toArray()
       res.send(result)
+    })
+    app.delete('/pets/:id',async (req, res) =>{
+       const id = req.params.id
+       console.log(id)
+      const query = {
+        _id: new ObjectId(id)
+      }
+       const result = await petCollection.deleteOne(query)
+       res.send(result)
     })
 
 
