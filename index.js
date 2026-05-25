@@ -2,6 +2,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const env = require('dotenv')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 
@@ -25,6 +26,7 @@ const run = async () =>{
 
     const db = client.db('petzone')
     const petCollection = db.collection('pets')
+    const adoptRequest = db.collection('adoptRequest')
 
 
 
@@ -74,6 +76,18 @@ const run = async () =>{
       }
        const result = await petCollection.deleteOne(query)
        res.send(result)
+    })
+    app.get('/adoptRequest', async(req, res)=>{
+      const cursor = adoptRequest.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.post('/adoptRequest', async(req, res)=>{
+      const adopted = req.body
+
+      const result = await adoptRequest.insertOne(adopted)
+      res.send(result)
     })
 
 
