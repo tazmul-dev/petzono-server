@@ -20,6 +20,12 @@ const client = new MongoClient(uri, {
   }
 });
 
+ const verifyToken =  (req, res, next) =>{
+     const header = req.headers.authorization
+     console.log(header)
+     next()
+    }
+
 const run = async () =>{
   try{
     await client.connect();
@@ -45,7 +51,7 @@ const run = async () =>{
       const result = await petCollection.find(query).toArray()
        res.send(result)
     })
-    app.get('/pets/:id', async(req, res)=>{
+    app.get('/pets/:id',verifyToken, async(req, res)=>{
       const id = req.params.id
       // console.log(id)
       const query = {
@@ -68,7 +74,7 @@ const run = async () =>{
       const result = await cursor.toArray()
       res.send(result)
     })
-    app.delete('/pets/:id',async (req, res) =>{
+    app.delete('/pets/:id', async (req, res) =>{
        const id = req.params.id
        console.log(id)
       const query = {
@@ -85,8 +91,20 @@ const run = async () =>{
 
     app.post('/adoptRequest', async(req, res)=>{
       const adopted = req.body
-
+      // console.log(adopted)
       const result = await adoptRequest.insertOne(adopted)
+
+      res.send(result)
+    })
+    app.get('/showRequest/:id', async(req, res)=>{
+      const cursor = await adoptRequest.find({PetId:req.params.id})
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+     app.get('/myRequest/:email', async(req, res)=>{
+      const cursor = adoptRequest.find({email:req.params.email})
+      const result = await cursor.toArray()
       res.send(result)
     })
 
