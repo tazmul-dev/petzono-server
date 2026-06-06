@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
 
  const verifyToken =  (req, res, next) =>{
      const header = req.headers.authorization
-     console.log(header)
+    //  console.log(header)
      next()
     }
 
@@ -106,6 +106,56 @@ const run = async () =>{
       const cursor = adoptRequest.find({email:req.params.email})
       const result = await cursor.toArray()
       res.send(result)
+    })
+
+    app.patch('/requestAddopt/:id', async(req,res)=>{
+      const addoptId = req.params.id
+      console.log(addoptId)
+
+        const request = await adoptRequest.findOne({
+      _id: new ObjectId(addoptId),
+
+    })
+     const petId = request.PetId;
+
+     console.log(request)
+
+     await adoptRequest.updateOne({
+      _id: new ObjectId(addoptId)
+     },
+    {
+      $set:{
+        status:'approved'
+      }
+    }
+    );
+    await adoptRequest.updateMany({
+      PetId: petId,
+      _id:{
+        $ne:new ObjectId(addoptId),
+      },
+    },
+    {
+      $set:{
+        status:'rejected'
+      },
+    }
+
+  )
+  await petCollection.updateOne({
+    _id: new ObjectId(petId)
+  },
+  {
+    $set:{
+      status:"Addopted"
+    },
+  }
+
+ )
+  res.send({
+      success:true,
+       message: "Request approved successfully",
+    })
     })
 
 
