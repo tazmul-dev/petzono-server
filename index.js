@@ -34,10 +34,16 @@ const run = async () =>{
     const petCollection = db.collection('pets')
     const adoptRequest = db.collection('adoptRequest')
 
-
+   app.get('/allPets',async(req, res)=>{
+        const cursor = petCollection.find()
+        const result =await cursor.toArray()
+        res.send(result)
+   })
 
     app.get('/pets', async (req, res)=>{
       const search = req.query.search;
+      const species = req.query.species;
+      
       let query ={};
 
       if(search){
@@ -48,6 +54,13 @@ const run = async () =>{
           }
         }
       }
+       if (species) {
+    const speciesArray = species.split(",");
+
+    query.species = {
+      $in: speciesArray,
+    };
+  }
       const result = await petCollection.find(query).toArray()
        res.send(result)
     })
@@ -64,7 +77,7 @@ const run = async () =>{
 
     app.post('/pets', async (req, res)=>{
       const allPet = req.body
-      console.log(allPet)
+     
       const result = await petCollection.insertOne(allPet)
       res.send(result)
     })
@@ -76,7 +89,7 @@ const run = async () =>{
     })
     app.delete('/pets/:id', async (req, res) =>{
        const id = req.params.id
-       console.log(id)
+       
       const query = {
         _id: new ObjectId(id)
       }
@@ -158,6 +171,30 @@ const run = async () =>{
     })
     })
 
+    app.patch('/requestReject/:id',async(req, res)=>{
+      const rejectId = req.params.id
+      console.log(rejectId)
+
+        const request = await adoptRequest.findOne({
+      _id: new ObjectId(rejectId),
+
+    })
+    await adoptRequest.updateOne({
+      _id: new ObjectId(rejectId)
+     },
+    {
+      $set:{
+        status:'rejected'
+      }
+    }
+    );
+    res.send({
+      success:true,
+       message: "Request approved successfully",
+    })
+    })
+
+    
 
     await client.db('admin').command({ping:1});
      console.log("Pinged your deployment. You successfully connected to MongoDB!");
